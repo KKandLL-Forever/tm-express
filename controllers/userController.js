@@ -1,6 +1,7 @@
 // 用户控制器 - 处理用户相关的业务逻辑
-
 const Logger = require('../utils/logger');
+
+// 模拟数据
 const users = [
 	{ id: 1, name: 'John Doe', email: 'john@example.com', createdAt: new Date() },
 	{ id: 2, name: 'Jane Smith', email: 'jane@example.com', createdAt: new Date() }
@@ -9,268 +10,270 @@ const users = [
 // 获取所有用户
 exports.getAllUsers = async (req, res, next) => {
 	try {
-		return res.json({
+		Logger.info('获取所有用户列表', { 
+			requestId: req.headers['x-request-id'],
+			userAgent: req.headers['user-agent']
+		});
+
+		const result = {
 			success: true,
 			data: users,
 			total: users.length
+		};
+
+		Logger.info('用户列表获取成功', { 
+			total: users.length,
+			requestId: req.headers['x-request-id']
 		});
+
+		return res.json(result);
 	} catch (error) {
+		Logger.error('获取用户列表失败', { 
+			error: error.message,
+			stack: error.stack,
+			requestId: req.headers['x-request-id']
+		});
 		return next(error);
 	}
 };
-// 模拟数据库操作的用户服务
-class UserService {
-	constructor() {
-		this.users = [
-			{ id: 1, name: 'John Doe', email: 'john@example.com', createdAt: new Date() },
-			{ id: 2, name: 'Jane Smith', email: 'jane@example.com', createdAt: new Date() }
-		];
-	}
 
-	getAllUsers() {
-		return this.users;
-	}
+// 根据ID获取用户
+exports.getUserById = async (req, res, next) => {
+	try {
+		const { id } = req.params;
+		
+		Logger.info('根据ID获取用户', { 
+			userId: id,
+			requestId: req.headers['x-request-id']
+		});
 
-	// 根据ID获取用户
-	getUserById(id) {
-		return this.users.find(user => user.id === parseInt(id));
-	}
+		const user = users.find(user => user.id === parseInt(id));
+		
+		if (!user) {
+			Logger.warning('用户不存在', { 
+				userId: id,
+				requestId: req.headers['x-request-id']
+			});
+			
+			return res.status(404).json({
+				success: false,
+				message: 'User not found'
+			});
+		}
 
-	// 根据邮箱获取用户
-	getUserByEmail(email) {
-		return this.users.find(user => user.email === email);
-	}
+		Logger.info('用户信息获取成功', { 
+			userId: id,
+			userName: user.name,
+			requestId: req.headers['x-request-id']
+		});
 
-	// 创建用户
-	createUser(userData) {
+		return res.json({
+			success: true,
+			data: user
+		});
+	} catch (error) {
+		Logger.error('获取用户信息失败', { 
+			userId: req.params.id,
+			error: error.message,
+			stack: error.stack,
+			requestId: req.headers['x-request-id']
+		});
+		return next(error);
+	}
+};
+
+// 创建新用户
+exports.createUser = async (req, res, next) => {
+	try {
+		const { name, email } = req.body;
+
+		Logger.info('创建新用户', { 
+			name,
+			email,
+			requestId: req.headers['x-request-id']
+		});
+
+		// 验证必需参数
+		if (!name || !email) {
+			Logger.warning('创建用户参数不完整', { 
+				name: !!name,
+				email: !!email,
+				requestId: req.headers['x-request-id']
+			});
+
+			return res.status(400).json({
+				success: false,
+				message: 'Name and email are required'
+			});
+		}
+
+		// 检查邮箱是否已存在
+		const existingUser = users.find(user => user.email === email);
+		if (existingUser) {
+			Logger.warning('邮箱已存在', { 
+				email,
+				existingUserId: existingUser.id,
+				requestId: req.headers['x-request-id']
+			});
+
+			return res.status(409).json({
+				success: false,
+				message: 'Email already exists'
+			});
+		}
+
+		// 创建新用户
 		const newUser = {
-			id: this.users.length > 0 ? Math.max(...this.users.map(u => u.id)) + 1 : 1,
-			...userData,
+			id: Math.max(...users.map(u => u.id)) + 1,
+			name,
+			email,
 			createdAt: new Date()
 		};
-		this.users.push(newUser);
-		return newUser;
+
+		users.push(newUser);
+
+		Logger.info('用户创建成功', { 
+			userId: newUser.id,
+			name: newUser.name,
+			email: newUser.email,
+			requestId: req.headers['x-request-id']
+		});
+
+		return res.status(201).json({
+			success: true,
+			data: newUser,
+			message: 'User created successfully'
+		});
+	} catch (error) {
+		Logger.error('创建用户失败', { 
+			error: error.message,
+			stack: error.stack,
+			requestBody: req.body,
+			requestId: req.headers['x-request-id']
+		});
+		return next(error);
 	}
+};
 
-	// 更新用户
-	updateUser(id, userData) {
-		const userIndex = this.users.findIndex(user => user.id === parseInt(id));
-		if (userIndex === -1) return null;
+// 更新用户信息
+exports.updateUser = async (req, res, next) => {
+	try {
+		const { id } = req.params;
+		const { name, email } = req.body;
 
-		this.users[userIndex] = {
-			...this.users[userIndex],
-			...userData,
-			updatedAt: new Date()
-		};
-		return this.users[userIndex];
-	}
+		Logger.info('更新用户信息', { 
+			userId: id,
+			updateData: { name, email },
+			requestId: req.headers['x-request-id']
+		});
 
-	// 删除用户
-	deleteUser(id) {
-		const userIndex = this.users.findIndex(user => user.id === parseInt(id));
-		if (userIndex === -1) return null;
-
-		return this.users.splice(userIndex, 1)[0];
-	}
-}
-
-const userService = new UserService();
-
-// 控制器方法
-const userController = {
-	// 获取所有用户
-	getAllUsers: async (req, res) => {
-		try {
-			Logger.info('获取所有用户列表', { action: 'getAllUsers', ip: req.ip });
-
-			const users = userService.getAllUsers();
-			res.json({
-				success: true,
-				data: users,
-				total: users.length
+		const userIndex = users.findIndex(user => user.id === parseInt(id));
+		
+		if (userIndex === -1) {
+			Logger.warning('要更新的用户不存在', { 
+				userId: id,
+				requestId: req.headers['x-request-id']
 			});
-		} catch (error) {
-			res.status(500).json({
+
+			return res.status(404).json({
 				success: false,
-				message: 'Failed to fetch users',
-				error: error.message
+				message: 'User not found'
 			});
 		}
-	},
 
-	// 根据ID获取用户
-	getUserById: async (req, res) => {
-		try {
-			const { id } = req.params;
-			const user = userService.getUserById(id);
-
-			Logger.info('获取用户信息', { action: 'getUserById', userId: id, ip: req.ip });
-
-			if (!user) {
-				Logger.warning('用户不存在', { action: 'getUserById', userId: id, ip: req.ip });
-				return res.status(404).json({
-					success: false,
-					message: 'User not found'
-				});
-			}
-
-			res.json({
-				success: true,
-				data: user
-			});
-		} catch (error) {
-			res.status(500).json({
-				success: false,
-				message: 'Failed to fetch user',
-				error: error.message
-			});
-		}
-	},
-
-	// 创建用户
-	createUser: async (req, res) => {
-		try {
-			const { name, email } = req.body;
-
-			Logger.info('创建新用户请求', { action: 'createUser', name, email, ip: req.ip });
-
-			// 验证必填字段
-			if (!name || !email) {
-				Logger.warning('创建用户失败：参数不完整', { action: 'createUser', name, email, ip: req.ip });
-				return res.status(400).json({
-					success: false,
-					message: 'Name and email are required'
-				});
-			}
-
-			// 验证邮箱格式
-			const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-			if (!emailRegex.test(email)) {
-				return res.status(400).json({
-					success: false,
-					message: 'Invalid email format'
-				});
-			}
-
-			// 检查邮箱是否已存在
-			const existingUser = userService.getUserByEmail(email);
+		// 如果更新邮箱，检查是否与其他用户冲突
+		if (email && email !== users[userIndex].email) {
+			const existingUser = users.find(user => user.email === email && user.id !== parseInt(id));
 			if (existingUser) {
+				Logger.warning('更新邮箱冲突', { 
+					userId: id,
+					email,
+					conflictUserId: existingUser.id,
+					requestId: req.headers['x-request-id']
+				});
+
 				return res.status(409).json({
 					success: false,
 					message: 'Email already exists'
 				});
 			}
-
-			const newUser = userService.createUser({ name, email });
-
-			Logger.info('用户创建成功', { action: 'createUser', userId: newUser.id, name, email, ip: req.ip });
-
-			res.status(201).json({
-				success: true,
-				message: 'User created successfully',
-				data: newUser
-			});
-		} catch (error) {
-			res.status(500).json({
-				success: false,
-				message: 'Failed to create user',
-				error: error.message
-			});
 		}
-	},
 
-	// 更新用户
-	updateUser: async (req, res) => {
-		try {
-			const { id } = req.params;
-			const { name, email } = req.body;
+		// 更新用户信息
+		const oldData = { ...users[userIndex] };
+		if (name) users[userIndex].name = name;
+		if (email) users[userIndex].email = email;
+		users[userIndex].updatedAt = new Date();
 
-			Logger.info('更新用户请求', { action: 'updateUser', userId: id, name, email, ip: req.ip });
+		Logger.info('用户信息更新成功', { 
+			userId: id,
+			oldData: { name: oldData.name, email: oldData.email },
+			newData: { name: users[userIndex].name, email: users[userIndex].email },
+			requestId: req.headers['x-request-id']
+		});
 
-			// 检查用户是否存在
-			const existingUser = userService.getUserById(id);
-			if (!existingUser) {
-				Logger.warning('更新用户失败：用户不存在', { action: 'updateUser', userId: id, ip: req.ip });
-				return res.status(404).json({
-					success: false,
-					message: 'User not found'
-				});
-			}
-
-			// 如果更新邮箱，检查是否被其他用户使用
-			if (email && email !== existingUser.email) {
-				const emailUser = userService.getUserByEmail(email);
-				if (emailUser) {
-					return res.status(409).json({
-						success: false,
-						message: 'Email already exists'
-					});
-				}
-
-				// 验证邮箱格式
-				const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-				if (!emailRegex.test(email)) {
-					return res.status(400).json({
-						success: false,
-						message: 'Invalid email format'
-					});
-				}
-			}
-
-			const updateData = {};
-			if (name) updateData.name = name;
-			if (email) updateData.email = email;
-
-			const updatedUser = userService.updateUser(id, updateData);
-
-			Logger.info('用户更新成功', { action: 'updateUser', userId: id, updatedData: { name, email }, ip: req.ip });
-
-			res.json({
-				success: true,
-				message: 'User updated successfully',
-				data: updatedUser
-			});
-		} catch (error) {
-			res.status(500).json({
-				success: false,
-				message: 'Failed to update user',
-				error: error.message
-			});
-		}
-	},
-
-	// 删除用户
-	deleteUser: async (req, res) => {
-		try {
-			const { id } = req.params;
-
-			Logger.info('删除用户请求', { action: 'deleteUser', userId: id, ip: req.ip });
-
-			const deletedUser = userService.deleteUser(id);
-
-			if (!deletedUser) {
-				Logger.warning('删除用户失败：用户不存在', { action: 'deleteUser', userId: id, ip: req.ip });
-				return res.status(404).json({
-					success: false,
-					message: 'User not found'
-				});
-			}
-
-			Logger.info('用户删除成功', { action: 'deleteUser', userId: id, deletedUser, ip: req.ip });
-
-			res.json({
-				success: true,
-				message: 'User deleted successfully',
-				data: deletedUser
-			});
-		} catch (error) {
-			res.status(500).json({
-				success: false,
-				message: 'Failed to delete user',
-				error: error.message
-			});
-		}
+		return res.json({
+			success: true,
+			data: users[userIndex],
+			message: 'User updated successfully'
+		});
+	} catch (error) {
+		Logger.error('更新用户信息失败', { 
+			userId: req.params.id,
+			error: error.message,
+			stack: error.stack,
+			requestBody: req.body,
+			requestId: req.headers['x-request-id']
+		});
+		return next(error);
 	}
 };
 
-module.exports = userController;
+// 删除用户
+exports.deleteUser = async (req, res, next) => {
+	try {
+		const { id } = req.params;
+
+		Logger.info('删除用户', { 
+			userId: id,
+			requestId: req.headers['x-request-id']
+		});
+
+		const userIndex = users.findIndex(user => user.id === parseInt(id));
+		
+		if (userIndex === -1) {
+			Logger.warning('要删除的用户不存在', { 
+				userId: id,
+				requestId: req.headers['x-request-id']
+			});
+
+			return res.status(404).json({
+				success: false,
+				message: 'User not found'
+			});
+		}
+
+		const deletedUser = users[userIndex];
+		users.splice(userIndex, 1);
+
+		Logger.info('用户删除成功', { 
+			userId: id,
+			deletedUserName: deletedUser.name,
+			deletedUserEmail: deletedUser.email,
+			requestId: req.headers['x-request-id']
+		});
+
+		return res.json({
+			success: true,
+			message: 'User deleted successfully'
+		});
+	} catch (error) {
+		Logger.error('删除用户失败', { 
+			userId: req.params.id,
+			error: error.message,
+			stack: error.stack,
+			requestId: req.headers['x-request-id']
+		});
+		return next(error);
+	}
+};
