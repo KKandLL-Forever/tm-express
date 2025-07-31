@@ -39,8 +39,8 @@ async function testAuth() {
         Logger.info('Redis读写测试', { key: 'test-key', value });
         
         // 测试用户token缓存
-        await Redis.set('user-testuser', token, 600);
-        const cachedToken = await Redis.get('user-testuser');
+        await Redis.set('user-test-user', token, 600);
+        const cachedToken = await Redis.get('user-test-user');
         Logger.info('用户token缓存测试', { 
             cached: !!cachedToken,
             tokenMatch: cachedToken === token
@@ -52,7 +52,7 @@ async function testAuth() {
         
         // 清理测试数据
         await Redis.del('test-key');
-        await Redis.del('user-testuser');
+        await Redis.del('user-test-user');
         
         Logger.info('认证功能测试完成');
         

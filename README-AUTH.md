@@ -16,12 +16,12 @@
 ```
 nodejs/
 ├── controllers/
-│   ├── authController.js      # 认证控制器
-│   └── accountController.js   # 账户控制器
+│   ├── auth.controller.js     # 认证控制器
+  └── account.controller.js  # 账户控制器
 ├── middleware/
 │   └── auth.js               # 认证中间件
 ├── routes/
-│   └── auth.js               # 认证路由
+│   └── auth.route.js         # 认证路由
 ├── utils/
 │   ├── jwt.js                # JWT工具类
 │   ├── redis.js              # Redis工具类
@@ -307,12 +307,12 @@ GET /api/auth/getRoleBinding?userId=123
 
 | PHP文件 | Node.js文件 | 功能说明 |
 |---------|-------------|----------|
-| `Auth.php` | `authController.js` | 认证控制器 |
-| `Account.php` | `accountController.js` | 账户控制器 |
-| `Token.php` | `authController.js` | Token管理 |
+| `Auth.php` | `auth.controller.js` | 认证控制器 |
+| `Account.php` | `account.controller.js` | 账户控制器 |
+| `Token.php` | `auth.controller.js` | Token管理 |
 | `Events.php` | `auth.js` (middleware) | 认证中间件 |
 | `Jwt.php` | `jwt.js` | JWT工具类 |
-| `Auth.php` (urls) | `auth.js` (routes) | 认证路由 |
+| `Auth.php` (urls) | `auth.route.js` (routes) | 认证路由 |
 | `OpenIDClient.php` | `openIDClient.js` | OIDC客户端 |
 
 ## 开发说明

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const authController = require('../controllers/authController');
-const accountController = require('../controllers/accountController');
+const authController = require('../controllers/auth.controller');
+const accountController = require('../controllers/account.controller');
 const AuthMiddleware = require('../middleware/auth');
 const Logger = require('../utils/logger');
 
@@ -54,59 +54,59 @@ router.get('/check-permission', AuthMiddleware.tokenCheck, accountController.che
 // ============ 权限管理接口（需要管理员权限） ============
 
 // 加载权限表
-router.get('/loadPermissionSheet', 
-    AuthMiddleware.tokenCheck,
-    AuthMiddleware.requirePermissions(['admin.permission.read']),
-    authController.loadPermissionSheet
+router.get('/loadPermissionSheet',
+	AuthMiddleware.tokenCheck,
+	AuthMiddleware.requirePermissions(['admin.permission.read']),
+	authController.loadPermissionSheet
 );
 
 // 获取主体权限
 router.get('/getPermissionsForPrincipal',
-    AuthMiddleware.tokenCheck,
-    AuthMiddleware.requirePermissions(['admin.permission.read']),
-    authController.getPermissionsForPrincipal
+	AuthMiddleware.tokenCheck,
+	AuthMiddleware.requirePermissions(['admin.permission.read']),
+	authController.getPermissionsForPrincipal
 );
 
 // 角色列表
 router.get('/listRole',
-    AuthMiddleware.tokenCheck,
-    AuthMiddleware.requirePermissions(['admin.role.read']),
-    authController.listRole
+	AuthMiddleware.tokenCheck,
+	AuthMiddleware.requirePermissions(['admin.role.read']),
+	authController.listRole
 );
 
 // 编辑角色
 router.put('/editRole',
-    AuthMiddleware.tokenCheck,
-    AuthMiddleware.requirePermissions(['admin.role.write']),
-    authController.editRole
+	AuthMiddleware.tokenCheck,
+	AuthMiddleware.requirePermissions(['admin.role.write']),
+	authController.editRole
 );
 
 // 删除角色
 router.delete('/deleteRole',
-    AuthMiddleware.tokenCheck,
-    AuthMiddleware.requirePermissions(['admin.role.delete']),
-    authController.deleteRole
+	AuthMiddleware.tokenCheck,
+	AuthMiddleware.requirePermissions(['admin.role.delete']),
+	authController.deleteRole
 );
 
 // 创建角色绑定
 router.post('/createRoleBinding',
-    AuthMiddleware.tokenCheck,
-    AuthMiddleware.requirePermissions(['admin.role.bind']),
-    authController.createRoleBinding
+	AuthMiddleware.tokenCheck,
+	AuthMiddleware.requirePermissions(['admin.role.bind']),
+	authController.createRoleBinding
 );
 
 // 修改角色绑定
 router.put('/modifyRoleBinding',
-    AuthMiddleware.tokenCheck,
-    AuthMiddleware.requirePermissions(['admin.role.bind']),
-    authController.modifyRoleBinding
+	AuthMiddleware.tokenCheck,
+	AuthMiddleware.requirePermissions(['admin.role.bind']),
+	authController.modifyRoleBinding
 );
 
 // 获取角色绑定
 router.get('/getRoleBinding',
-    AuthMiddleware.tokenCheck,
-    AuthMiddleware.requirePermissions(['admin.role.read']),
-    authController.getRoleBinding
+	AuthMiddleware.tokenCheck,
+	AuthMiddleware.requirePermissions(['admin.role.read']),
+	authController.getRoleBinding
 );
 
 module.exports = router;

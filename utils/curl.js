@@ -42,12 +42,47 @@ class Curl {
         },
         'rdb.loadOperationSheet': {
             method: 'POST',
-            url: '/api/operations',
+            url: '/LoadOperationSheet',
             host: process.env.RDB_HOST || 'http://localhost:8080'
         },
         'rdb.getNode': {
             method: 'POST',
-            url: '/api/node',
+            url: '/InspectNode',
+            host: process.env.RDB_HOST || 'http://localhost:8080'
+        },
+        'rdb.listNodeCate': {
+            method: 'POST',
+            url: '/api/node/cate/list',
+            host: process.env.RDB_HOST || 'http://localhost:8080'
+        },
+        'rdb.createNodeCate': {
+            method: 'POST',
+            url: '/api/node/cate/create',
+            host: process.env.RDB_HOST || 'http://localhost:8080'
+        },
+        'rdb.getNodeCate': {
+            method: 'POST',
+            url: '/api/node/cate/get',
+            host: process.env.RDB_HOST || 'http://localhost:8080'
+        },
+        'rdb.deleteNodeCate': {
+            method: 'POST',
+            url: '/api/node/cate/delete',
+            host: process.env.RDB_HOST || 'http://localhost:8080'
+        },
+        'rdb.getNodeTree': {
+            method: 'POST',
+            url: '/api/node/tree',
+            host: process.env.RDB_HOST || 'http://localhost:8080'
+        },
+        'rdb.createNode': {
+            method: 'POST',
+            url: '/api/node/create',
+            host: process.env.RDB_HOST || 'http://localhost:8080'
+        },
+        'rdb.deleteNode': {
+            method: 'POST',
+            url: '/api/node/delete',
             host: process.env.RDB_HOST || 'http://localhost:8080'
         },
         'auth.whoami': {
